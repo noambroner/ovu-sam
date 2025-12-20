@@ -12,7 +12,7 @@ import logging
 from app.core.config import settings
 from app.clients import ulm
 from app.middleware.logging import RequestLoggingMiddleware
-from app.api.v1.routes import auth, health, example
+from app.api.v1.routes import auth, health, example, applications, dependencies, graph
 
 # Configure logging
 logging.basicConfig(
@@ -68,6 +68,11 @@ app.add_middleware(RequestLoggingMiddleware)
 app.include_router(health.router)  # Health checks (no prefix)
 app.include_router(auth.router, prefix=settings.API_V1_STR)
 app.include_router(example.router, prefix=settings.API_V1_STR)
+
+# SAM Core Routes
+app.include_router(applications.router, prefix=settings.API_V1_STR)
+app.include_router(dependencies.router, prefix=settings.API_V1_STR)
+app.include_router(graph.router, prefix=settings.API_V1_STR)
 
 
 @app.get("/")

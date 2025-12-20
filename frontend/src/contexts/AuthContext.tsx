@@ -45,26 +45,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const storedUser = authAPI.getStoredUser();
       if (storedUser) {
         setUser(storedUser);
+        setLoading(false); // Set user immediately - trust stored data
 
-        // Validate token in background
-        authAPI.getCurrentUser()
-          .then((claims) => {
-            // Update user from token claims if needed
-            const userFromToken: UserInfo = {
-              id: claims.sub,
-              username: claims.email?.split('@')[0] || 'user',
-              email: claims.email || '',
-              role: claims.role || 'user',
-            };
-            setUser(userFromToken);
-            authAPI.storeUser(userFromToken);
-          })
-          .catch(() => {
-            // Token invalid - clear auth
-            authAPI.clearTokens();
-            setUser(null);
-          })
-          .finally(() => setLoading(false));
+        // Don't validate token immediately on page load
+        // The apiClient interceptor will handle 401s and refresh when needed
+        // This avoids unnecessary API calls and console errors
 
         return;
       }

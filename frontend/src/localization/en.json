@@ -16,7 +16,13 @@
     "dashboard": "Dashboard",
     "settings": "Settings",
     "users": "Users",
-    "reports": "Reports"
+    "allUsers": "All Users",
+    "addUser": "Add User",
+    "reports": "Reports",
+    "profile": "Profile",
+    "manage": "Manage",
+    "api": "API",
+    "logs": "Logs"
   },
   "dashboard": {
     "title": "Dashboard",

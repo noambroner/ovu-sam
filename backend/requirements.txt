@@ -17,17 +17,15 @@ httpx==0.25.2
 # JWT Handling (decode only, no validation)
 python-jose[cryptography]==3.3.0
 
-# Optional: Database Support
-# Uncomment if your app needs a database
-# sqlalchemy==2.0.23
-# alembic==1.12.1
-# asyncpg==0.29.0
-# psycopg2-binary==2.9.9
+# Database Support (SAM uses PostgreSQL)
+sqlalchemy==2.0.23
+alembic==1.12.1
+asyncpg==0.29.0
+psycopg2-binary==2.9.9
 
-# Optional: Redis Support
-# Uncomment if your app needs Redis
-# redis==5.0.1
-# hiredis==2.2.3
+# Redis Support (SAM uses Redis for caching)
+redis==5.0.1
+hiredis==2.2.3
 
 # Optional: Task Queue
 # Uncomment if your app needs background tasks
