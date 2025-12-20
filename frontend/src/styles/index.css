@@ -1,0 +1,14 @@
+/* ==============================================
+   MAIN STYLES - OVU App Template
+   Imports all style files
+   ============================================== */
+
+/* Base styles (resets, scrollbar, global elements) */
+@import './base.css';
+
+/* Theme variables (colors, spacing, etc.) */
+@import './theme.css';
+
+/* App-specific styles */
+@import './app.css';
+
