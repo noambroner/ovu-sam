@@ -1,0 +1,270 @@
+# Cursor AI Rules for SAM Project
+
+## ⚠️ CRITICAL: Read Before Starting ANY Work
+
+### 🤖 Mandatory First Steps for Every Session:
+
+**At the START of EVERY new session, you MUST execute these steps IN ORDER:**
+
+0. **📖 READ the project README first:**
+   ```
+   ACTION: Use the read_file tool to read:
+   README.md
+
+   The README contains important project overview and structure information.
+   ```
+
+1. **📚 READ the Architecture documentation:**
+   ```
+   ACTION: Use the read_file tool to read:
+   /home/noam/projects/ovu/docs/specs/services/sam/SAM_REVISED_SCOPE.md
+
+   This file contains the SAM system architecture and scope.
+   ```
+
+2. **📝 READ the Session Handoff:**
+   ```
+   ACTION: Use the read_file tool to read:
+   /home/noam/projects/ovu/docs/SESSION_HANDOFF.md
+
+   This file contains context from previous sessions.
+   ```
+
+3. **🎯 ASK USER for session goal:**
+   ```
+   ACTION: Ask the user what they want to accomplish in this session.
+   ```
+
+---
+
+## 🏗️ SAM Architecture — 2 Servers
+
+**Server Credentials:**
+- **Frontend Server (dataflow-dev2):**
+  - IP: 64.176.173.105
+  - User: ploi
+  - Sudo Password: 43ACBUHlZWOxwAueKji8
+  - SSH Key: ~/.ssh/ovu_key
+
+- **Backend Server (dataflow-dev1):**
+  - IP: 64.176.171.223
+  - User: ploi
+  - Sudo Password: mb9z7KRSD9VVQLgpb596
+  - SSH Key: ~/.ssh/ovu_key
+
+- **Database Server (dataflow-dev-db):**
+  - IP: 64.177.67.215
+  - User: ploi
+  - Sudo Password: 0BweAsz8ptKfsYuBt5Dy
+  - Database User: ploi
+  - Database Password: qU4EuCVGncATUOaTk4UR
+
+```
+SAM System:
+
+🔧 Backend Server (API)
+   - Server: 64.176.171.223 (shared with ULM/AAM)
+   - Port: 8005
+   - Path: /home/ploi/ovu-sam/backend/
+   - Process: uvicorn app.main:app --host 0.0.0.0 --port 8005
+   - SSH: ssh -i ~/.ssh/ovu_key ploi@64.176.171.223
+
+🌐 Frontend Server (React)
+   - Server: 64.176.173.105
+   - Domain: https://sam.ovu.co.il
+   - Path: /home/ploi/sam.ovu.co.il/public/
+   - SSH: ssh -i ~/.ssh/ovu_key ploi@64.176.173.105
+   - Nginx: Serves from /public/ directory
+```
+
+---
+
+## 🚀 Deployment Rules (CRITICAL!)
+
+### Frontend Deployment - 4 MANDATORY STEPS:
+```bash
+# ⚠️ Nginx serves ONLY from /public/ directory!
+# ⚠️ DO NOT use rsync - ONLY use scp!
+
+# Step 1: Build locally
+cd /home/noam/projects/ovu/worktrees/sam-work/frontend
+npm run build
+
+# Step 2: Upload to server
+scp -i ~/.ssh/ovu_key -r dist/* ploi@64.176.173.105:/home/ploi/sam.ovu.co.il/public/
+
+# Step 3: Verify deployment
+curl -s https://sam.ovu.co.il/ | head -20
+
+# Step 4: Test login
+# Open https://sam.ovu.co.il/ and verify login works
+```
+
+### Backend Deployment - 4 MANDATORY STEPS:
+```bash
+# ⚠️ Must kill specific PID with kill -9!
+
+# Step 1: Upload files
+cd /home/noam/projects/ovu/worktrees/sam-work/backend
+scp -i ~/.ssh/ovu_key -r app/ ploi@64.176.171.223:/home/ploi/ovu-sam/backend/
+
+# Step 2: Find PID of running uvicorn
+ssh -i ~/.ssh/ovu_key ploi@64.176.171.223 "lsof -i :8005 | grep -v COMMAND"
+# You'll get a PID - e.g., 589740
+
+# Step 3: Kill the specific process (replace [PID] with actual number)
+echo 'mb9z7KRSD9VVQLgpb596' | ssh -i ~/.ssh/ovu_key ploi@64.176.171.223 "sudo -S kill -9 [PID]"
+
+# Step 4: Start uvicorn + verify
+ssh -i ~/.ssh/ovu_key ploi@64.176.171.223 "cd /home/ploi/ovu-sam/backend && source venv/bin/activate && nohup uvicorn app.main:app --host 0.0.0.0 --port 8005 > /tmp/sam-backend.log 2>&1 &"
+sleep 3
+curl -s https://sam.ovu.co.il/health
+```
+
+---
+
+## 🗄️ Database Rules
+
+### SAM Database:
+- **Database Name:** `sam_db`
+- **Connection:** PostgreSQL on 64.177.67.215
+- **Migrations:** Store in `backend/migrations/`
+- **Run migrations:** `psql -h 64.177.67.215 -U ploi -d sam_db -f migrations/xxx.sql`
+
+### API Response Serialization:
+**CRITICAL:** When adding new DB columns, you MUST explicitly include them in API responses!
+
+```python
+# ❌ WRONG - New fields won't appear in API
+return {"id": item.id, "name": item.name}
+
+# ✅ CORRECT - Explicitly include all fields
+return {
+    "id": item.id,
+    "name": item.name,
+    "description": item.description,  # New field
+    "created_at": item.created_at  # New field
+}
+```
+
+---
+
+## 🎨 Design System Rules (CRITICAL!)
+
+**ALWAYS use CSS Variables - NEVER hardcoded colors!**
+
+### ✅ CORRECT:
+```css
+.my-component {
+  background: var(--card-background);
+  color: var(--text-primary);
+  border: 2px solid var(--border-color);
+}
+```
+
+### ❌ WRONG:
+```css
+.my-component {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+```
+
+**Available CSS Variables:**
+- `--background-color` / `--bg-color`
+- `--card-background` / `--surface-color`
+- `--text-primary` / `--text-color`
+- `--text-secondary`
+- `--border-color`
+- `--primary-blue` / `--primary-color` (#2563eb or #3b82f6)
+- `--hover-bg`
+
+---
+
+## 💻 Coding Standards
+
+### Multi-language Support (i18n):
+System supports 3 languages: Hebrew, English, Arabic.
+EVERY UI text MUST be translated!
+
+```typescript
+const t = {
+  he: { title: "כותרת בעברית" },
+  en: { title: "Title in English" },
+  ar: { title: "العنوان بالعربية" }
+};
+```
+
+### Git Workflow:
+```bash
+cd /home/noam/projects/ovu/worktrees/sam-work
+git status  # Check before changes
+git diff    # Review changes
+# Make changes
+git add <files>
+git commit -m "Clear description in Hebrew or English"
+git push
+```
+
+---
+
+## 🔒 Security & Authentication
+
+- SAM uses **ULM** for authentication
+- JWT Access Token: 15 minutes
+- Refresh Token: 7 days
+- Frontend connects to: https://ulm-rct.ovu.co.il/api/v1/auth/login
+- Backend validates tokens via ULM service
+
+---
+
+## 📊 System Information
+
+**Frontend:**
+- React 18 + TypeScript + Vite
+- 3 languages (he/en/ar) with RTL support
+- CSS Variables for theming
+- Axios with interceptors for auth & logging
+
+**Backend:**
+- FastAPI + PostgreSQL
+- JWT authentication via ULM
+- API Logging middleware
+- SQLAlchemy ORM
+
+**Production URLs:**
+- Frontend: https://sam.ovu.co.il
+- Backend API: http://64.176.171.223:8005
+- Health Check: https://sam.ovu.co.il/health
+- ULM Auth: https://ulm-rct.ovu.co.il
+
+---
+
+## 📝 SAM Scope (IMPORTANT!)
+
+**SAM (System Mapping Manager) is responsible for:**
+- ✅ Mapping all OVU applications
+- ✅ Documenting application paths and URLs
+- ✅ Explaining application purposes
+- ✅ Visualizing system architecture
+- ✅ Tracking application dependencies
+
+**SAM is NOT responsible for:**
+- ❌ System monitoring (handled by future SMM module)
+- ❌ System health checks (handled by future SMM module)
+- ❌ Performance metrics (handled by future SMM module)
+
+---
+
+## ⚠️ Remember:
+
+1. **Use CSS Variables ONLY** - no hardcoded colors
+2. **Deploy to public/** for frontend (Nginx requirement)
+3. **Include new fields in API responses** explicitly
+4. **Update TypeScript interfaces** when backend changes
+5. **Support 3 languages** for all UI text
+6. **Commit after successful deployment**
+7. **SAM focuses on mapping, NOT monitoring**
+
+**This is NOT optional - it's a mandatory part of the development process!**
+

@@ -74,7 +74,7 @@ const refreshToken = async (): Promise<string | null> => {
   if (!refreshPromise) {
     refreshPromise = (async () => {
       try {
-        const response = await api.post('/api/v1/auth/refresh', {
+        const response = await api.post('/auth/refresh', {
           refresh_token: refresh
         });
         const newAccess = response.data?.access_token;

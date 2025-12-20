@@ -37,7 +37,7 @@ export interface UserClaims {
  * Login user
  */
 export const login = async (credentials: LoginCredentials): Promise<LoginResponse> => {
-  const response = await api.post<LoginResponse>('/api/v1/auth/login', credentials);
+  const response = await api.post<LoginResponse>('/auth/login', credentials);
 
   // Store tokens
   setTokens(response.data.access_token, response.data.refresh_token);
@@ -54,7 +54,7 @@ export const login = async (credentials: LoginCredentials): Promise<LoginRespons
  * Refresh access token
  */
 export const refresh = async (refreshToken: string): Promise<LoginResponse> => {
-  const response = await api.post<LoginResponse>('/api/v1/auth/refresh', {
+  const response = await api.post<LoginResponse>('/auth/refresh', {
     refresh_token: refreshToken
   });
 
@@ -68,7 +68,7 @@ export const refresh = async (refreshToken: string): Promise<LoginResponse> => {
  * Get current user info from token claims
  */
 export const getCurrentUser = async (): Promise<UserClaims> => {
-  const response = await api.get<UserClaims>('/api/v1/auth/me');
+  const response = await api.get<UserClaims>('/auth/me');
   return response.data;
 };
 
@@ -78,7 +78,7 @@ export const getCurrentUser = async (): Promise<UserClaims> => {
 export const logout = async (): Promise<void> => {
   try {
     // Attempt to logout on server (optional - ULM may track sessions)
-    await api.post('/api/v1/auth/logout');
+    await api.post('/auth/logout');
   } catch (error) {
     // Ignore errors - we'll clear tokens anyway
     console.error('Logout error:', error);
