@@ -4,7 +4,7 @@
  */
 
 import { useTheme } from '../contexts/ThemeContext';
-import { getTranslation, getTranslationObject, type Language } from '../localization';
+import { getTranslation, getTranslationObject } from '../localization';
 
 export const useTranslation = () => {
   const { language } = useTheme();

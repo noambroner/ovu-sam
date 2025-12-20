@@ -5,6 +5,9 @@
 
 import api, { setTokens, clearTokens } from './apiClient';
 
+// Re-export for convenience
+export { clearTokens };
+
 export interface LoginCredentials {
   username: string;
   password: string;
