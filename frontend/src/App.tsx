@@ -1,14 +1,15 @@
 /**
  * Main App Component
  * Handles routing and authentication flow
+ * Uses federated OVU Sidebar for navigation
  */
 
+import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { useTheme } from './contexts/ThemeContext';
 import { useTranslation } from './hooks/useTranslation';
-import { Sidebar } from './components/Sidebar';
 import { LoginPage } from './pages/LoginPage';
 import Dashboard from './pages/Dashboard';
 import AppsList from './pages/AppsList';
@@ -16,6 +17,37 @@ import AppDetail from './pages/AppDetail';
 import SystemMap from './pages/SystemMap';
 import './styles/index.css';
 import './components/Layout/Layout.css';
+
+// Federated OVU Sidebar - loaded from remote
+const OVUSidebar = lazy(() => import('sidebar/Sidebar').then(m => ({ default: m.OVUSidebar || m.default })));
+
+// Fallback sidebar skeleton
+const SidebarSkeleton = () => (
+  <aside className="sidebar-skeleton" style={{
+    width: '280px',
+    height: '100vh',
+    background: 'var(--color-surface, #1e293b)',
+    position: 'fixed',
+    right: 0,
+    top: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '12px',
+  }}>
+    <div style={{
+      width: '32px',
+      height: '32px',
+      border: '3px solid var(--color-border, #334155)',
+      borderTopColor: 'var(--color-primary, #6366f1)',
+      borderRadius: '50%',
+      animation: 'spin 1s linear infinite',
+    }} />
+    <span style={{ color: 'var(--color-text-muted, #94a3b8)', fontSize: '14px' }}>טוען סרגל...</span>
+    <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+  </aside>
+);
 
 /**
  * Protected content that requires authentication
@@ -25,7 +57,8 @@ function ProtectedApp() {
   const { theme, language, toggleTheme, setLanguage } = useTheme();
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const location = useLocation();
+  // location used for potential future navigation state
+  useLocation();
 
   if (loading) {
     return <div className="loading">{t('common.loading')}</div>;
@@ -42,77 +75,47 @@ function ProtectedApp() {
     setLanguage(languages[nextIndex]);
   };
 
-  // SAM Menu Items - System Mapping Manager
-  const menuItems = [
-    {
-      id: 'dashboard',
-      label: t('menu.dashboard'),
-      labelEn: t('menu.dashboard'),
-      labelAr: t('menu.dashboard'),
-      icon: '🗺️',
-      path: '/dashboard'
-    },
-    {
-      id: 'apps',
-      label: 'אפליקציות',
-      labelEn: 'Applications',
-      labelAr: 'التطبيقات',
-      icon: '📦',
-      path: '/apps',
-      subItems: [
-        {
-          id: 'all-apps',
-          label: 'כל האפליקציות',
-          labelEn: 'All Applications',
-          labelAr: 'جميع التطبيقات',
-          icon: '📋',
-          path: '/apps/all'
-        },
-        {
-          id: 'add-app',
-          label: 'הוספת אפליקציה',
-          labelEn: 'Add Application',
-          labelAr: 'إضافة تطبيق',
-          icon: '➕',
-          path: '/apps/add'
-        }
-      ]
-    },
-    {
-      id: 'map',
-      label: 'מפת מערכת',
-      labelEn: 'System Map',
-      labelAr: 'خريطة النظام',
-      icon: '🌐',
-      path: '/map'
-    },
-    {
-      id: 'dependencies',
-      label: 'תלויות',
-      labelEn: 'Dependencies',
-      labelAr: 'التبعيات',
-      icon: '🔗',
-      path: '/dependencies'
-    },
-    {
-      id: 'settings',
-      label: t('menu.settings'),
-      labelEn: t('menu.settings'),
-      labelAr: t('menu.settings'),
-      icon: '⚙️',
-      path: '/settings'
+  // Handle app switching from sidebar
+  const handleAppSwitch = (app: any) => {
+    if (app.frontendUrl && app.code !== 'sam') {
+      window.location.href = app.frontendUrl;
     }
-  ];
+  };
+
+  // Handle menu item clicks
+  const handleMenuItemClick = (item: any, app: any) => {
+    if (app.code === 'sam') {
+      // Internal navigation for SAM
+      navigate(item.path);
+    } else if (app.frontendUrl) {
+      // External navigation for other apps
+      window.location.href = `${app.frontendUrl}${item.path}`;
+    }
+  };
 
   return (
     <div className="app-layout" dir={language === 'he' || language === 'ar' ? 'rtl' : 'ltr'}>
-      <Sidebar
-        menuItems={menuItems}
-        currentPath={location.pathname}
-        language={language}
-        theme={theme}
-        onNavigate={(path) => navigate(path)}
-      />
+      {/* Federated OVU Sidebar */}
+      <Suspense fallback={<SidebarSkeleton />}>
+        <OVUSidebar
+          currentApp="sam"
+          samApiUrl="https://sam.ovu.co.il/api/v1"
+          language={language}
+          theme={theme}
+          showSearch={true}
+          showUser={true}
+          user={{
+            id: user.id || 0,
+            username: user.username,
+            email: user.email,
+            role: user.role,
+          }}
+          onAppSwitch={handleAppSwitch}
+          onMenuItemClick={handleMenuItemClick}
+          onLogout={logout}
+          onSettings={() => navigate('/settings')}
+        />
+      </Suspense>
 
       <div className="main-layout">
         <header className="app-header">
@@ -201,4 +204,3 @@ function App() {
 }
 
 export default App;
-
