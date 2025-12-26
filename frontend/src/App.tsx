@@ -1,15 +1,16 @@
 /**
  * Main App Component
  * Handles routing and authentication flow
- * Uses federated OVU Sidebar for navigation
+ * Uses OVU Sidebar NPM package for navigation
  */
 
-import { lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { useTheme } from './contexts/ThemeContext';
 import { useTranslation } from './hooks/useTranslation';
+import { OVUSidebar } from '@ovu/sidebar';
+import '@ovu/sidebar/dist/style.css';
 import { LoginPage } from './pages/LoginPage';
 import Dashboard from './pages/Dashboard';
 import AppsList from './pages/AppsList';
@@ -17,37 +18,6 @@ import AppDetail from './pages/AppDetail';
 import SystemMap from './pages/SystemMap';
 import './styles/index.css';
 import './components/Layout/Layout.css';
-
-// Federated OVU Sidebar - loaded from remote
-const OVUSidebar = lazy(() => import('sidebar/Sidebar').then(m => ({ default: m.OVUSidebar || m.default })));
-
-// Fallback sidebar skeleton
-const SidebarSkeleton = () => (
-  <aside className="sidebar-skeleton" style={{
-    width: '280px',
-    height: '100vh',
-    background: 'var(--color-surface, #1e293b)',
-    position: 'fixed',
-    right: 0,
-    top: 0,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '12px',
-  }}>
-    <div style={{
-      width: '32px',
-      height: '32px',
-      border: '3px solid var(--color-border, #334155)',
-      borderTopColor: 'var(--color-primary, #6366f1)',
-      borderRadius: '50%',
-      animation: 'spin 1s linear infinite',
-    }} />
-    <span style={{ color: 'var(--color-text-muted, #94a3b8)', fontSize: '14px' }}>טוען סרגל...</span>
-    <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-  </aside>
-);
 
 /**
  * Protected content that requires authentication
@@ -57,8 +27,6 @@ function ProtectedApp() {
   const { theme, language, toggleTheme, setLanguage } = useTheme();
   const { t } = useTranslation();
   const navigate = useNavigate();
-  // location used for potential future navigation state
-  useLocation();
 
   if (loading) {
     return <div className="loading">{t('common.loading')}</div>;
@@ -95,27 +63,24 @@ function ProtectedApp() {
 
   return (
     <div className="app-layout" dir={language === 'he' || language === 'ar' ? 'rtl' : 'ltr'}>
-      {/* Federated OVU Sidebar */}
-      <Suspense fallback={<SidebarSkeleton />}>
-        <OVUSidebar
-          currentApp="sam"
-          samApiUrl="https://sam.ovu.co.il/api/v1"
-          language={language}
-          theme={theme}
-          showSearch={true}
-          showUser={true}
-          user={{
-            id: user.id || 0,
-            username: user.username,
-            email: user.email,
-            role: user.role,
-          }}
-          onAppSwitch={handleAppSwitch}
-          onMenuItemClick={handleMenuItemClick}
-          onLogout={logout}
-          onSettings={() => navigate('/settings')}
-        />
-      </Suspense>
+      <OVUSidebar
+        currentApp="sam"
+        samApiUrl="https://sam.ovu.co.il/api/v1"
+        language={language}
+        theme={theme}
+        showSearch={true}
+        showUser={true}
+        user={{
+          id: user.id || 0,
+          username: user.username,
+          email: user.email,
+          role: user.role,
+        }}
+        onAppSwitch={handleAppSwitch}
+        onMenuItemClick={handleMenuItemClick}
+        onLogout={logout}
+        onSettings={() => navigate('/settings')}
+      />
 
       <div className="main-layout">
         <header className="app-header">
