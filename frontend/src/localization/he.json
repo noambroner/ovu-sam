@@ -50,7 +50,9 @@
     "view_all": "צפה בהכל",
     "retry": "נסה שוב",
     "clear_filters": "נקה מסננים",
-    "not_specified": "לא צוין"
+    "not_specified": "לא צוין",
+    "name": "שם",
+    "more": "עוד"
   },
   "sam": {
     "applications": "אפליקציות",
@@ -67,6 +69,7 @@
     "type_tool": "כלי",
     "type_integration": "אינטגרציה",
     "type_microservice": "מיקרו-סרוויס",
+    "type_other": "אחר",
     "routes": "נתיבים",
     "dependencies": "תלויות",
     "dependents": "תלויים",
@@ -103,10 +106,14 @@
     "no_documentation": "אין תיעוד",
     "view_in_map": "צפה במפה",
     "view_details": "צפה בפרטים",
+    "view_full_details": "צפה בפרטים מלאים",
     "open_app": "פתח אפליקציה",
     "system_map": "מפת מערכת",
+    "system_map_subtitle": "מפת כל האפליקציות והשירותים במערכת OVU",
     "graph_view": "תצוגת גרף",
     "tree_view": "תצוגת עץ",
+    "grid_view": "תצוגת רשת",
+    "list_view": "תצוגת רשימה",
     "matrix_view": "תצוגת מטריצה",
     "consumer": "צרכן",
     "provider": "ספק",
@@ -136,7 +143,11 @@
     "error_loading_app": "שגיאה בטעינת אפליקציה",
     "app_not_found": "אפליקציה לא נמצאה",
     "error_loading_graph": "שגיאה בטעינת גרף",
-    "error_loading_dashboard": "שגיאה בטעינת לוח בקרה"
+    "error_loading_dashboard": "שגיאה בטעינת לוח בקרה",
+    "select_app": "בחר אפליקציה",
+    "select_app_desc": "לחץ על אפליקציה מהרשימה כדי לראות פרטים מלאים",
+    "ai_banner_text": "סוכני AI יכולים לגשת למידע זה דרך",
+    "view_api": "צפה ב-API"
   },
   "status": {
     "active": "פעיל",
@@ -152,4 +163,3 @@
     "language": "EN"
   }
 }
-
