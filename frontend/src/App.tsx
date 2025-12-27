@@ -50,36 +50,23 @@ function ProtectedApp() {
     }
   };
 
-  // Handle menu item clicks
-  const handleMenuItemClick = (item: any, app: any) => {
-    if (app.code === 'sam') {
-      // Internal navigation for SAM
-      navigate(item.path);
-    } else if (app.frontendUrl) {
-      // External navigation for other apps
-      window.location.href = `${app.frontendUrl}${item.path}`;
-    }
-  };
-
   return (
     <div className="app-layout" dir={language === 'he' || language === 'ar' ? 'rtl' : 'ltr'}>
       <OVUSidebar
-        currentApp="sam"
-        samApiUrl="https://sam.ovu.co.il/api/v1"
-        language={language}
-        theme={theme}
-        showSearch={true}
-        showUser={true}
-        user={{
-          id: user.id || 0,
-          username: user.username,
-          email: user.email,
-          role: user.role,
+        config={{
+          currentApp: 'sam',
+          language,
+          theme,
+          currentUser: {
+            name: user.username,
+            role: user.role,
+          },
+          onAppSwitch: handleAppSwitch,
+          onNavigate: (path) => navigate(path),
+          onLogout: logout,
+          onToggleTheme: toggleTheme,
+          onToggleLanguage: toggleLanguage
         }}
-        onAppSwitch={handleAppSwitch}
-        onMenuItemClick={handleMenuItemClick}
-        onLogout={logout}
-        onSettings={() => navigate('/settings')}
       />
 
       <div className="main-layout">
