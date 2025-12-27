@@ -13,6 +13,7 @@ from app.core.config import settings
 from app.clients import ulm
 from app.middleware.logging import RequestLoggingMiddleware
 from app.api.v1.routes import auth, health, example, applications, dependencies, graph
+from app.api import database_viewer
 
 # Configure logging
 logging.basicConfig(
@@ -73,6 +74,9 @@ app.include_router(example.router, prefix=settings.API_V1_STR)
 app.include_router(applications.router, prefix=settings.API_V1_STR)
 app.include_router(dependencies.router, prefix=settings.API_V1_STR)
 app.include_router(graph.router, prefix=settings.API_V1_STR)
+
+# Database Viewer
+app.include_router(database_viewer.router, prefix=f"{settings.API_V1_STR}/database", tags=["database"])
 
 
 @app.get("/")

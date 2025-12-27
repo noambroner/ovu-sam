@@ -78,8 +78,11 @@ class ApplicationService:
         if category:
             query = query.where(Application.category == category)
 
-        # Apply pagination
-        query = query.offset(skip).limit(limit)
+        # Apply ordering & pagination
+        query = query.order_by(
+            Application.display_order.asc().nulls_last(),
+            Application.name.asc()
+        ).offset(skip).limit(limit)
 
         result = await db.execute(query)
         return result.scalars().all()
@@ -139,7 +142,9 @@ class ApplicationService:
                 "backend_url": app.backend_url,
                 "icon": app.icon,
                 "color": app.color,
+                "display_order": app.display_order,
                 "tags": app.tags,
+                "menu_items": app.menu_items,
                 "created_at": app.created_at,
                 "updated_at": app.updated_at,
                 "dependencies_count": deps_required.scalar_one(),

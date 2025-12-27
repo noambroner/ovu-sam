@@ -105,6 +105,9 @@ class Application(Base):
     icon = Column(String(500), nullable=True)  # Icon URL or emoji
     color = Column(String(7), nullable=True)  # Hex color
     tags = Column(JSON, nullable=True)  # Array of tags
+    display_order = Column(Integer, nullable=True)  # Ordering for sidebar/app list
+    navigation_items = Column(JSON, nullable=True)  # Navigation menu items (legacy)
+    menu_items = Column(JSON, nullable=True)  # Menu items for sidebar
 
     # Audit
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)

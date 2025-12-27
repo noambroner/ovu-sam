@@ -11,7 +11,7 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\""
   },
   "dependencies": {
-    "@ovu/sidebar": "file:../../shared-work/sidebar/ovu-sidebar-2.0.2.tgz",
+    "@ovu/sidebar": "file:../../shared-work/sidebar/ovu-sidebar-2.0.4.tgz",
     "axios": "^1.6.0",
     "i18next": "^25.7.3",
     "react": "^18.2.0",

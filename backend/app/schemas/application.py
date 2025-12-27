@@ -36,7 +36,10 @@ class ApplicationBase(BaseModel):
     github_url: Optional[str] = None
     icon: Optional[str] = None
     color: Optional[str] = None
+    display_order: Optional[int] = None
     tags: Optional[List[str]] = None
+    navigation_items: Optional[List[Dict[str, Any]]] = None
+    menu_items: Optional[List[Dict[str, Any]]] = None
 
 
 class ApplicationCreate(ApplicationBase):
@@ -81,6 +84,8 @@ class ApplicationResponse(ApplicationBase):
     """Schema for application response"""
     id: int
     tech_stack: Optional[Dict[str, Any]] = None
+    navigation_items: Optional[List[Dict[str, Any]]] = None
+    menu_items: Optional[List[Dict[str, Any]]] = None
     release_date: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
@@ -117,7 +122,9 @@ class ApplicationListResponse(BaseModel):
     backend_url: Optional[str] = None
     icon: Optional[str] = None
     color: Optional[str] = None
+    display_order: Optional[int] = None
     tags: Optional[List[str]] = None
+    menu_items: Optional[List[Dict[str, Any]]] = None
     created_at: datetime
     updated_at: datetime
 
@@ -137,6 +144,8 @@ class ApplicationDetailResponse(ApplicationResponse):
     integration_guide: Optional[str] = None
     troubleshooting: Optional[str] = None
     faq: Optional[str] = None
+    navigation_items: Optional[List[Dict[str, Any]]] = None
+    menu_items: Optional[List[Dict[str, Any]]] = None
 
     # Related data (will be populated by service layer)
     dependencies_required: Optional[List[DependencySummary]] = []

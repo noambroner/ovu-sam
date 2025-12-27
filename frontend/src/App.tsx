@@ -4,6 +4,7 @@
  * Uses OVU Sidebar NPM package for navigation
  */
 
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -16,6 +17,10 @@ import Dashboard from './pages/Dashboard';
 import AppsList from './pages/AppsList';
 import AppDetail from './pages/AppDetail';
 import SystemMap from './pages/SystemMap';
+import { DevelopmentGuidelines } from './components/DevelopmentGuidelines/DevelopmentGuidelines';
+import { APIUIEndpoints } from './components/APIUIEndpoints/APIUIEndpoints';
+import { APILogs } from './components/APILogs/APILogs';
+import { DatabaseViewer } from './components/DatabaseViewer/DatabaseViewer';
 import './styles/index.css';
 import './components/Layout/Layout.css';
 
@@ -27,6 +32,24 @@ function ProtectedApp() {
   const { theme, language, toggleTheme, setLanguage } = useTheme();
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [menuItems, setMenuItems] = React.useState<any[]>([]);
+
+  // Fetch menu items from API
+  React.useEffect(() => {
+    const fetchMenuItems = async () => {
+      try {
+        const response = await fetch('/api/v1/applications');
+        const apps = await response.json();
+        const samApp = apps.find((app: any) => app.code === 'SAM');
+        if (samApp?.menu_items) {
+          setMenuItems(samApp.menu_items);
+        }
+      } catch (error) {
+        console.error('Failed to fetch menu items:', error);
+      }
+    };
+    fetchMenuItems();
+  }, []);
 
   if (loading) {
     return <div className="loading">{t('common.loading')}</div>;
@@ -55,12 +78,14 @@ function ProtectedApp() {
       <OVUSidebar
         config={{
           currentApp: 'sam',
+          samApiUrl: 'https://sam.ovu.co.il/api/v1',
           language,
           theme,
           currentUser: {
             name: user.username,
             role: user.role,
           },
+          additionalMenuItems: menuItems,
           onAppSwitch: handleAppSwitch,
           onNavigate: (path) => navigate(path),
           onLogout: logout,
@@ -125,6 +150,12 @@ function ProtectedApp() {
                 ⚙️ {t('menu.settings')}
               </div>
             } />
+
+            {/* Technical Pages */}
+            <Route path="/dev-guidelines" element={<DevelopmentGuidelines language={language} theme={theme} />} />
+            <Route path="/api/ui" element={<APIUIEndpoints language={language} theme={theme} />} />
+            <Route path="/database-viewer" element={<DatabaseViewer language={language} theme={theme} />} />
+            <Route path="/logs/backend" element={<APILogs language={language} theme={theme} />} />
 
             {/* Default & 404 */}
             <Route path="/" element={<Navigate to="/dashboard" replace />} />

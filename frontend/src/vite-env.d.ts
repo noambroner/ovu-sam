@@ -1,49 +1,59 @@
 /// <reference types="vite/client" />
 
-// Module Federation - Remote Sidebar declarations
-declare module 'sidebar/Sidebar' {
-  import { FC } from 'react';
+// Override @ovu/sidebar types to add samApiUrl
+declare module '@ovu/sidebar' {
+  import { FC, ReactNode } from 'react';
 
-  interface SidebarUser {
-    id: string | number;
-    username: string;
-    email: string;
-    role: string;
-    avatar?: string;
+  export type Language = 'en' | 'he' | 'ar';
+  export type Theme = 'light' | 'dark';
+
+  export interface MenuItem {
+    id: string;
+    label: string;
+    labelEn?: string;
+    path: string;
+    icon?: ReactNode;
+    order?: number;
+    subItems?: MenuItem[];
   }
 
-  interface OVUApplication {
+  export interface OVUApplication {
     id: string;
     code: string;
     name: string;
+    icon: ReactNode;
+    status: string;
+    description?: string;
     frontendUrl?: string;
+    menuItems?: MenuItem[];
+    color?: string;
+    navigation_items?: MenuItem[];
   }
 
-  interface MenuItem {
-    id: string;
-    label: string;
-    path: string;
-    icon?: string;
-  }
-
-  interface OVUSidebarProps {
+  export interface SidebarConfig {
     currentApp: string;
     samApiUrl?: string;
-    language?: 'he' | 'en' | 'ar';
-    theme?: 'light' | 'dark' | 'system';
-    collapsed?: boolean;
-    showSearch?: boolean;
-    showUser?: boolean;
-    user?: SidebarUser;
+    currentUser: {
+      name: string;
+      role: string;
+      avatar?: string;
+    };
+    language: Language;
+    theme: Theme;
+    additionalMenuItems?: MenuItem[];
+    onNavigate?: (path: string) => void;
     onAppSwitch?: (app: OVUApplication) => void;
-    onMenuItemClick?: (item: MenuItem, app: OVUApplication) => void;
-    onCollapsedChange?: (collapsed: boolean) => void;
     onLogout?: () => void;
-    onSettings?: () => void;
+    onToggleTheme?: () => void;
+    onToggleLanguage?: () => void;
   }
 
-  export const OVUSidebar: FC<OVUSidebarProps>;
-  export default OVUSidebar;
+  export interface SidebarProps {
+    config: SidebarConfig;
+    className?: string;
+  }
+
+  export const OVUSidebar: FC<SidebarProps>;
 }
 
 declare module 'sidebar/SidebarProvider' {
